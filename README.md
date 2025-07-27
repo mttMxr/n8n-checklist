@@ -1,46 +1,197 @@
-# Getting Started with Create React App
+# 📚 Чек-лист курса n8n
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Интерактивное веб-приложение для отслеживания прогресса изучения курса n8n с облачным сохранением данных.
 
-## Available Scripts
+## ✨ Особенности
 
-In the project directory, you can run:
+- 🎯 **57 уроков** в 7 категориях
+- ☁️ **Облачное сохранение** через Firebase
+- 📊 **Интерактивная статистика** прогресса
+- 🎨 **Современный UI** с анимациями
+- 📱 **Адаптивный дизайн** для всех устройств
+- 🔍 **Поиск и фильтрация** уроков
+- 📝 **Заметки к урокам**
+- 🎉 **Эффекты достижений** при 100% завершении
 
-### `npm start`
+## 🚀 Быстрый старт
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### 1. Установка зависимостей
+```bash
+npm install
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### 2. Настройка Firebase
 
-### `npm test`
+1. Создайте проект в [Firebase Console](https://console.firebase.google.com/)
+2. Включите Firestore Database
+3. Скопируйте конфигурацию в `src/firebase.ts`:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```typescript
+const firebaseConfig = {
+  apiKey: "ваш-api-key",
+  authDomain: "ваш-project.firebaseapp.com",
+  projectId: "ваш-project-id",
+  storageBucket: "ваш-project.appspot.com",
+  messagingSenderId: "ваш-sender-id",
+  appId: "ваш-app-id"
+};
+```
 
-### `npm run build`
+### 3. Запуск в режиме разработки
+```bash
+npm start
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Приложение будет доступно по адресу [http://localhost:3000](http://localhost:3000)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 🌐 Развертывание
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Vercel (Рекомендуется)
 
-### `npm run eject`
+1. Установите Vercel CLI:
+```bash
+npm i -g vercel
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+2. Разверните приложение:
+```bash
+vercel
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+3. Настройте переменные окружения в Vercel Dashboard:
+   - `REACT_APP_FIREBASE_API_KEY`
+   - `REACT_APP_FIREBASE_AUTH_DOMAIN`
+   - `REACT_APP_FIREBASE_PROJECT_ID`
+   - `REACT_APP_FIREBASE_STORAGE_BUCKET`
+   - `REACT_APP_FIREBASE_MESSAGING_SENDER_ID`
+   - `REACT_APP_FIREBASE_APP_ID`
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### Netlify
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+1. Создайте файл `netlify.toml`:
+```toml
+[build]
+  command = "npm run build"
+  publish = "build"
+```
 
-## Learn More
+2. Подключите репозиторий к Netlify
+3. Настройте переменные окружения
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 📁 Структура проекта
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```
+src/
+├── components/          # React компоненты
+│   ├── ProgressCard.tsx
+│   ├── LessonCard.tsx
+│   └── LessonList.tsx
+├── hooks/              # Кастомные хуки
+│   └── useFirestore.ts
+├── data/               # Данные уроков
+│   └── lessons.ts
+├── utils/              # Утилиты
+│   └── progress.ts
+├── types.ts            # TypeScript типы
+├── firebase.ts         # Конфигурация Firebase
+└── App.tsx            # Главный компонент
+```
+
+## 🎨 Технологии
+
+- **React 18** с TypeScript
+- **Firebase Firestore** для облачного хранения
+- **Framer Motion** для анимаций
+- **Tailwind CSS** для стилизации
+- **Lucide React** для иконок
+
+## 📊 Функциональность
+
+### Отслеживание прогресса
+- Автоматический подсчет завершенных уроков
+- Процентное отображение прогресса
+- Статистика по категориям
+- Визуальные индикаторы
+
+### Управление уроками
+- Отметка выполненных уроков
+- Добавление заметок
+- Поиск по названию
+- Фильтрация по категориям
+- Скрытие/показ завершенных
+
+### Экспорт данных
+- Скачивание в формате CSV
+- Поделиться прогрессом
+- Автоматическое сохранение в облаке
+
+## 🔧 Настройка Firebase
+
+1. **Создание проекта:**
+   - Перейдите в [Firebase Console](https://console.firebase.google.com/)
+   - Создайте новый проект
+   - Включите Firestore Database
+
+2. **Настройка правил безопасности:**
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if true; // Для демо - разрешить всем
+    }
+  }
+}
+```
+
+3. **Обновление конфигурации:**
+   - Замените данные в `src/firebase.ts`
+   - Добавьте переменные окружения для продакшена
+
+## 🎯 Категории уроков
+
+1. **🚀 Основы и настройка** (6 уроков)
+2. **🔗 Интеграции и подключения** (7 уроков)
+3. **⚙️ Продвинутые настройки** (8 уроков)
+4. **🤖 Создание AI-агентов** (11 уроков)
+5. **📱 Социальные сети** (6 уроков)
+6. **🎨 Контент и медиа** (10 уроков)
+7. **🔧 Продвинутые техники** (9 уроков)
+
+## 🚀 Развертывание на Vercel
+
+1. **Подготовка:**
+```bash
+npm run build
+```
+
+2. **Развертывание:**
+```bash
+vercel --prod
+```
+
+3. **Настройка домена** (опционально):
+   - В Vercel Dashboard перейдите в настройки проекта
+   - Добавьте кастомный домен
+
+## 📱 PWA возможности
+
+Приложение готово к установке как PWA:
+- Работает офлайн
+- Уведомления о прогрессе
+- Быстрый доступ с главного экрана
+
+## 🤝 Вклад в проект
+
+1. Форкните репозиторий
+2. Создайте ветку для новой функции
+3. Внесите изменения
+4. Создайте Pull Request
+
+## 📄 Лицензия
+
+MIT License - свободно используйте для своих проектов!
+
+---
+
+**Создано с ❤️ для изучения n8n и создания AI-агентов**
