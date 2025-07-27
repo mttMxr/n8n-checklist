@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Download, Share2, Trophy, BookOpen, Zap } from 'lucide-react';
-import { useFirestore } from './hooks/useFirestore';
+import { Download, Share2, Trophy, BookOpen, Zap, Upload, Users } from 'lucide-react';
+import { useLocalStorage } from './hooks/useLocalStorage';
 import { ProgressCard } from './components/ProgressCard';
 import { LessonList } from './components/LessonList';
 import { calculateProgress } from './utils/progress';
+import { lessonsData } from './data/lessons';
 import './App.css';
 
 function App() {
-  const { lessons, loading, toggleLesson, updateLessonNotes } = useFirestore();
+  const { lessons, loading, toggleLesson, updateLessonNotes } = useLocalStorage();
   const [activeTab, setActiveTab] = useState<'progress' | 'lessons'>('progress');
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   const progress = calculateProgress(lessons);
 
@@ -49,6 +51,46 @@ function App() {
     link.href = URL.createObjectURL(blob);
     link.download = `n8n_checklist_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
+  };
+
+  const exportToJSON = () => {
+    const data = {
+      lessons,
+      exportDate: new Date().toISOString(),
+      version: '1.0'
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `n8n_checklist_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+  };
+
+  const importFromJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target?.result as string);
+        if (data.lessons && Array.isArray(data.lessons)) {
+          localStorage.setItem('n8n-lessons', JSON.stringify(data.lessons));
+          window.location.reload();
+        }
+      } catch (error) {
+        alert('Ошибка при импорте файла');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const resetProgress = () => {
+    if (window.confirm('Сбросить весь прогресс? Это действие нельзя отменить.')) {
+      localStorage.setItem('n8n-lessons', JSON.stringify(lessonsData));
+      window.location.reload();
+    }
   };
 
   if (loading) {
@@ -125,17 +167,38 @@ function App() {
           </button>
           
           <button
-            onClick={() => navigator.share?.({ 
-              title: 'Чек-лист курса n8n',
-              text: `Мой прогресс: ${progress.percentage}% (${progress.completedLessons}/${progress.totalLessons} уроков)`,
-              url: window.location.href
-            })}
-            className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+            onClick={exportToJSON}
+            className="flex items-center space-x-2 px-6 py-3 bg-green-500 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
           >
             <Share2 size={20} />
-            <span>Поделиться</span>
+            <span>Экспорт JSON</span>
+          </button>
+          
+          <button
+            onClick={() => document.getElementById('import-input')?.click()}
+            className="flex items-center space-x-2 px-6 py-3 bg-blue-500 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+          >
+            <Upload size={20} />
+            <span>Импорт</span>
+          </button>
+          
+          <button
+            onClick={resetProgress}
+            className="flex items-center space-x-2 px-6 py-3 bg-red-500 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+          >
+            <Users size={20} />
+            <span>Сбросить</span>
           </button>
         </motion.div>
+
+        {/* Скрытый input для импорта */}
+        <input
+          id="import-input"
+          type="file"
+          accept=".json"
+          onChange={importFromJSON}
+          style={{ display: 'none' }}
+        />
 
         {/* Табы */}
         <div className="flex justify-center mb-8">
@@ -203,16 +266,47 @@ function App() {
           )}
         </motion.div>
 
-        {/* Футер */}
+        {/* Инструкция по совместному использованию */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
-          className="text-center mt-12 text-gray-500"
+          className="mt-8 bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+        >
+          <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <Users className="mr-2 text-blue-500" />
+            Как поделиться прогрессом с командой
+          </h3>
+          <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-600">
+            <div>
+              <h4 className="font-semibold mb-2">📤 Экспорт данных:</h4>
+              <ul className="space-y-1">
+                <li>• Нажмите "Экспорт JSON" для сохранения</li>
+                <li>• Отправьте файл коллегам</li>
+                <li>• Или используйте "Экспорт CSV" для Excel</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-2">📥 Импорт данных:</h4>
+              <ul className="space-y-1">
+                <li>• Нажмите "Импорт" и выберите JSON файл</li>
+                <li>• Прогресс автоматически обновится</li>
+                <li>• Используйте "Сбросить" для очистки</li>
+              </ul>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Футер */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5 }}
+          className="text-center mt-8 text-gray-500"
         >
           <p className="flex items-center justify-center space-x-2">
             <Zap size={16} />
-            <span>Данные сохраняются в облаке автоматически</span>
+            <span>Данные сохраняются локально • Поделитесь ссылкой с командой</span>
           </p>
         </motion.div>
       </div>

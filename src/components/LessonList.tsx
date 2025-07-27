@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, Search, BookOpen } from 'lucide-react';
+import { Search, BookOpen } from 'lucide-react';
 import { Lesson } from '../types';
 import { categories } from '../data/lessons';
 import { LessonCard } from './LessonCard';

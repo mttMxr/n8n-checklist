@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, Target, TrendingUp } from 'lucide-react';
+import { Target, TrendingUp } from 'lucide-react';
 import { ProgressStats } from '../types';
 
 interface ProgressCardProps {
